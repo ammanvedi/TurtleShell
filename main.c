@@ -1,7 +1,8 @@
 #include "main.h"
 
 char *current_directory;
-int ** environment_variables;
+char ** env_path;
+char * env_home;
 
 int main(void)
 {
@@ -29,22 +30,67 @@ int readProfile()
             //directories, so we can create an appropriatley sized array
             printf("found the path line\n");
             
-            char *pathpointslash = 1;
+            char *pathpointslash = '0';
             char *pathpointcolon = buf;
+            int pathcount = 0;
             
             while((pathpointslash != NULL) && (pathpointcolon != NULL) )
             {
                 pathpointslash = strchr(pathpointcolon+1, '/');
                 pathpointcolon = strchr(pathpointslash+1, ':');
                 
-                printf("found slash at %s\n", pathpointslash);
-                printf("found colon at %s\n", pathpointcolon);
+                if((pathpointslash == NULL) || (pathpointcolon == NULL))
+                {
+                    
+                }else
+                {
+                    pathcount+=1;
+                    printf("COUNTED PATHVAR ::  %d\n", pathcount);
+                }
             }
+            
+            char *pathfolder[pathcount];
+            int foldercount = 0;
+            
+            pathpointslash = '0';
+            pathpointcolon = buf;
+            
+            while((pathpointslash != NULL) && (pathpointcolon != NULL) )
+            {
+                pathpointslash = strchr(pathpointcolon+1, '/');
+                pathpointcolon = strchr(pathpointslash+1, ':');
+                
+                if((pathpointslash == NULL) || (pathpointcolon == NULL))
+                {
+                    
+                }else
+                {
+                    //printf("found slash at %s\n", pathpointslash);
+                    
+                    char *pathvar = malloc(sizeof(char)*(strlen(pathpointslash)-strlen(pathpointcolon)));
+                    
+                    strncpy(pathvar, pathpointslash, strlen(pathpointslash)-strlen(pathpointcolon));
+                    
+                    pathfolder[foldercount] = pathvar;
+                    
+                    printf(" FOLDERED PATHVAR ::  %s\n", pathfolder[foldercount]);
+                    
+                    foldercount+=1;
+                    
+                    
+                }
+            }
+            
+            env_path = pathfolder;
+            
         }else
         {
             if(strstr(buf, "HOME") != NULL)
             {
-                printf("found the home line\n");
+                env_home = strchr(buf, '/');
+                
+                
+                printf("FOLDERED HOME :: %s\n", env_home);
             }
         }
     }
