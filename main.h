@@ -1,0 +1,14 @@
+#ifndef MAIN_H
+#define MAIN_H
+
+#include <stdio.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+
+int init(char* startpathname);
+int gotodir(char* togo);
+int readProfile();
+
+#endif
