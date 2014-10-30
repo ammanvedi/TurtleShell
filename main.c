@@ -69,13 +69,18 @@ int readProfile()
                 {
                     //printf("found slash at %s\n", pathpointslash);
                     
-                    char *pathvar = malloc(sizeof(char)*(strlen(pathpointslash)-strlen(pathpointcolon)));
+                    char *pathvar = malloc(sizeof(char)*((strlen(pathpointslash)-strlen(pathpointcolon))+1));
                     
                     strncpy(pathvar, pathpointslash, strlen(pathpointslash)-strlen(pathpointcolon));
                     
+                    printf("%d bytes\n", strlen(pathvar));
+                    
+                    //null terminate string, strcpy doesnt always do this!
+                    pathvar[strlen(pathvar)] = '\0';
+                    
                     pathfolder[foldercount] = pathvar;
                     
-                    printf(" FOLDERED PATHVAR ::  %s\n", pathfolder[foldercount]);
+                    printf(" FOLDERED PATHVAR ::  %s\n", pathvar);
                     
                     foldercount+=1;
                     
