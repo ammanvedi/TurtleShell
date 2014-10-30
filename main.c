@@ -1,12 +1,13 @@
 #include "main.h"
 
 char *current_directory;
-char ** env_path;
+char * env_path;
 char * env_home;
+char **pathfolder;
 
 int main(void)
 {
-    readProfile();
+    
     init("/Users/ammanvedi");
     return 0;
 }   
@@ -22,7 +23,7 @@ int readProfile()
     
     while(fgets(buf,1000, profilepointer) != NULL)
     {
-        printf("%s", buf);
+        //printf("%s", buf);
         //determine if reading the path variable line
         if(strstr(buf, "PATH") != NULL)
         {
@@ -45,11 +46,12 @@ int readProfile()
                 }else
                 {
                     pathcount+=1;
-                    printf("COUNTED PATHVAR ::  %d\n", pathcount);
+                    //printf("COUNTED PATHVAR ::  %d\n", pathcount);
                 }
             }
             
-            char *pathfolder[pathcount];
+            pathfolder = (char **) malloc(sizeof(char *) * pathcount);
+            
             int foldercount = 0;
             
             pathpointslash = '0';
@@ -81,7 +83,8 @@ int readProfile()
                 }
             }
             
-            env_path = pathfolder;
+            env_path = *pathfolder;
+            
             
         }else
         {
@@ -90,7 +93,7 @@ int readProfile()
                 env_home = strchr(buf, '/');
                 
                 
-                printf("FOLDERED HOME :: %s\n", env_home);
+                printf(" FOLDERED HOME :: %s\n", env_home);
             }
         }
     }
@@ -100,6 +103,18 @@ int readProfile()
 
 int init(char* startpathname)
 {
+    readProfile();
+    
+    int x = 0;
+    
+    //for(x = 0; x < 
+    
+    
+    for(x = 0; x < 15; x++)
+    {
+        printf("the first path variable is %s\n", pathfolder[x]); 
+    }
+    
     return 0;
 }
 
