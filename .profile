@@ -1,2 +1,2 @@
-export PATH=$PATH:/Users/ammanvedi/.rvm/gems/ruby-1.8.7-p352/bin:/Users/ammanvedi/.rvm/gems/ruby-1.8.7-p352@global/bin:/Users/ammanvedi/.rvm/rubies/ruby-1.8.7-p352/bin:/Users/ammanvedi/.rvm/bin:/usr/local/bin:/usr/local/sbin:/usr/local/mysql/bin:/usr/apache-ant-1.9.3/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/git/bin:/usr/bin/ruby:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin/elastic-mapreduce-ruby-master
+export PATH=$PATH:/Users/ammanvedi/.rvm/bin:/usr/local/bin:/usr/local/mysql/bin:/usr/apache-ant-1.9.3/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/git/bin:/usr/bin/ruby:/Applications/Xcode.app/Contents/Developer/usr/bin:/usr/bin/elastic-mapreduce-ruby-master
 export HOME=/Users/ammanvedi
