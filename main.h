@@ -1,3 +1,15 @@
+/********************************************************
+
+                        MAIN.H
+
+  Amman Vedi - UCL Computer Science - Operating Systems
+                
+            C O U R S E W O R K    O N E  
+          
+                  NOVEMBER 2014
+
+*********************************************************/
+
 #ifndef MAIN_H
 #define MAIN_H
 
@@ -9,8 +21,9 @@
 #include <sys/types.h>
 #include <dirent.h>
 
+
 int init();
-int changeDirectory(char* togo);
+int changeDirectory(char *togo);
 int readProfile();
 int assignHome(char* home);
 int assignPath(char* path);

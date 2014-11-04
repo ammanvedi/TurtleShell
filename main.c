@@ -1,9 +1,24 @@
+/********************************************************
+
+                        MAIN.C
+
+  Amman Vedi - UCL Computer Science - Operating Systems
+                
+            C O U R S E W O R K    O N E  
+          
+                  NOVEMBER 2014
+
+*********************************************************/
+
+
 #include "main.h"
 
-char *current_directory;
+char * current_directory;
 char * env_path;
 char * env_home;
 char **pathfolder;
+//keep a count of haw many string paths are
+//being stored in the pathfolder pointer array
 int pathcount = 0;
 
 int main(void)
@@ -17,20 +32,19 @@ int readProfile()
 {
     FILE *profilepointer;
     char buf[1000];
-    
+    char * temphome;
+
     
     profilepointer = fopen(".profile", "rt");
-    //file open now
     
     while(fgets(buf,1000, profilepointer) != NULL)
     {
-        //printf("%s", buf);
         //determine if reading the path variable line
         if(strstr(buf, "PATH") != NULL)
         {
             //if we are reading the path line, then count the number of
             //directories, so we can create an appropriatley sized array
-            printf("found the path line\n");
+            //printf("found the path line\n");
             
             char *pathpointslash = '0';
             char *pathpointcolon = buf;
@@ -54,7 +68,6 @@ int readProfile()
             pathfolder = (char **) malloc(sizeof(char *) * pathcount);
             
             int foldercount = 0;
-            
             pathpointslash = '0';
             pathpointcolon = buf;
             
@@ -68,37 +81,28 @@ int readProfile()
                     
                 }else
                 {
-                    //printf("found slash at %s\n", pathpointslash);
-                    
                     char *pathvar = malloc(sizeof(char)*((strlen(pathpointslash)-strlen(pathpointcolon))+1));
-                    
                     strncpy(pathvar, pathpointslash, strlen(pathpointslash)-strlen(pathpointcolon));
-                    
-                    //printf("%d bytes\n", strlen(pathvar));
-                    
                     //null terminate string, strcpy doesnt always do this
                     pathvar[strlen(pathvar)] = '\0';
-     
                     pathfolder[foldercount] = pathvar;
-                    
-                    printf(" FOLDERED PATHVAR ::  %s\n", pathvar);
+                    //printf(" FOLDERED PATHVAR ::  %s\n", pathvar);
                     
                     foldercount+=1;
-                    
                     
                 }
             }
             
             env_path = *pathfolder;
             
-            
         }else
         {
             if(strstr(buf, "HOME") != NULL)
             {
-                env_home = strchr(buf, '/');
-                
-                
+      
+                temphome = strchr(buf, '/');
+                env_home = malloc(sizeof(char)*strlen(temphome));
+                strcpy(env_home, temphome);
                 //printf(" FOLDERED HOME :: %s\n", env_home);
             }
         }
@@ -110,10 +114,9 @@ int readProfile()
 int init()
 {
     readProfile();
-    
-    int x = 0;    
+    changeDirectory(env_home);
     readCommand();
-    
+    //printf("changing directory to home ststus %d\n",);
     return 0;
 }
 
@@ -139,8 +142,11 @@ int readCommand()
     char *tempstring;
     int countargs = 0;
     
+   
+    
+    printf("%s >> ", current_directory);
     scanf("%s %[^\t\n]", command, arguments);
-    printf("%s %s\n", command, arguments);
+    //printf("%s %s\n", command, arguments);
     
     arg_token = strtok_r(arguments, argsplitter, &svp);
     
@@ -157,11 +163,6 @@ int readCommand()
         //printf("%p\n", arg_token);
         arg_token = strtok_r(NULL, argsplitter, &svp);
     }
-    
-    
-    
-    //check arg length
-    
     
     int x = 0;
     
@@ -198,8 +199,6 @@ char* findProgram(char* programname)
     DIR *direc;
     char fullname[100];
     
-    //printf("%s\n", pathfolder[1]);
-    
     int y = 0;
     
     for(y = 0; y < (pathcount - 1); y++)
@@ -207,12 +206,9 @@ char* findProgram(char* programname)
         
         if((direc = opendir(pathfolder[y])) == NULL)
         {
-            printf("didnt open directory\n");
-            return 1;
-        }
-
-        printf("opened directory %s\n", pathfolder[y]);
-        
+            //couldnt open directory
+            return NULL;
+        }        
         //find all programs in the directory
         while((directoryinfo = readdir(direc)) != NULL)
         {
@@ -222,28 +218,35 @@ char* findProgram(char* programname)
                 //return 1;
                 if(access(fullname,X_OK) == 0)
                 {   
-                //printf("Found executable %s\n", fullname);
+                    //printf("Found executable %s\n", fullname);
                     if(strcmp(directoryinfo->d_name,programname) == 0 )
-                       {
+                    {
                            //printf("found matching exe\n");
                             return fullname;
-                       }
-                
-
+                    }
+                }
             }
-        }
-      }
-        
-        
-        
+        }    
     }
-    
-
     
     return NULL;
 }
 
-int changeDirectory(char* togo)
+int changeDirectory(char *togo)
 {
-    return 0;
+    //free the old memory
+    free(current_directory);
+    //allocate a new block of the appropriate size
+    //according to strlen of new string
+    current_directory = malloc(sizeof(char)*(strlen(togo)));
+    //copy new path into the gloabal path variable
+    strcpy(current_directory, togo);
+
+    //strings assigned here may have anewline character at the end
+    //this will cause problems for chdir, so we replace the '\0'
+    //to replace the newline
+    
+    current_directory[strlen(current_directory)-1] = '\0';
+    int x = chdir(current_directory);
+    return x;
 }
