@@ -28,6 +28,6 @@ int readProfile();
 int assignHome(char* home);
 int assignPath(char* path);
 int readCommand();
-int runProgram(char* name, char **arguments[]);
+int runProgram(char* name, char *arguments[]);
 char* findProgram(char* programname);
 #endif
