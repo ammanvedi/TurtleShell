@@ -115,7 +115,11 @@ int init()
 {
     readProfile();
     changeDirectory(env_home);
-    readCommand();
+    while(1)
+    {
+        readCommand();
+    }
+    
     //printf("changing directory to home ststus %d\n",);
     return 0;
 }
@@ -146,7 +150,7 @@ int readCommand()
     
     printf("%s >> ", current_directory);
     gets(arguments);
-    printf("arguments :: %s \n", arguments);
+    //printf("arguments :: %s \n", arguments);
     
     //split arguments
     
@@ -158,53 +162,21 @@ int readCommand()
         //
         //allocate a string pointer
         //tempstring = malloc(sizeof(char)*(strlen(arg_token)));
-        //arg_token 
-        printf("%s %d\n", arg_token, strlen(arg_token));
-        
-        
+        //printf("%s %d\n", arg_token, strlen(arg_token));
         arg_list = realloc(arg_list, sizeof(char *)*(++countargs));
         arg_list[countargs-1] = (char *)malloc(strlen(arg_token)+1);
         strcpy(arg_list[countargs-1], arg_token);
-        //char *tmparg = 
-        //char *argholder = malloc(sizeof(char*)*(strlen(arg_token)+1));
-        //strcpy(argholder, arg_token);
-        //argholder[strlen(arg_token)] = '\0';
         arg_token = strtok_r(NULL, &argsplitter, &svp);
         
-        printf("processing arg %s \n", arg_list[countargs-1]);
-            //arg_token;
-        //printf("argholder: %d\n", strlen(argholder));
-        //countargs+=1;
-        //realloc
-        
-        //printf("%p\n", arg_token);
+        //printf("processing arg %s \n", arg_list[countargs-1]);
         
     }
     
     arg_list = realloc(arg_list, sizeof(char *)*(countargs+1));
     arg_list[countargs] = (char*)0;
     
-    //arg_list = realloc(arg_list, sizeof(char*)*
-    
-    //realloc(arg_list, sizeof(char)*(countargs+1));
-    
-    //arg_list[countargs] = (char *)malloc(100);
-    //printf("init iterating and found %s\n", arg_list[1]);
-    //printf("lenth args = %lu\n", (sizeof(&arg_list)/ sizeof(arg_list[0])) );
-    //strcpy(arg_list[countargs], (char *)'h');
-    
-    int x = 0;
-    //printf("init iterating and found %s\n", arg_list[1]);
-    
-
-    
-    printf("\n");
-    
-
-    
-    runProgram(arg_list);
-    
-        free(command);
+    runProgram(arg_list);    
+    free(command);
     free(arguments);
     
     return 0;
@@ -213,31 +185,10 @@ int readCommand()
 
 int runProgram(char *arguments[])
 {
-    
-   
-    //strcpy(foundprogpath, tmppp);
-    printf("strlen of tmppp %s \n", arguments[0]);
-    //char *tmppp = 
+
     char *foundprogpath = findProgram(arguments[0]);
-    
-    //printf("strlen of tmppp %s\n", tmppp);
-    
-    
-
-    
-    //allocate path so it doesnt dissapear
-    //return value is heap memory 
-    
-    
     int c_stat;
-    
-    const char *args[] = {"ls", "-1", (char *)0};
-    
-        int x = 0;
-    //printf("init iterating and found %s\n", arg_list[1]);
-    
 
-    
     if(foundprogpath != NULL)
     {
         //found a program in one of the
@@ -249,12 +200,6 @@ int runProgram(char *arguments[])
         
         if(newproc == 0)
         {
-            //printf("dapath : %s\n", arguments[0]);
-            
-            
-            printf("val is %s\n", arguments[0]);
-            printf("val is %s\n", arguments[1]);
-            printf("val is %s\n", arguments[2]);
             int execstat = execv(foundprogpath, arguments);
             printf("calling EXECV failed :: %d\n", execstat);
         }else
@@ -273,15 +218,14 @@ int runProgram(char *arguments[])
             }while(tpid != newproc);
         }
     }
-    printf("finishedddddd\n");
+
     free(arguments);
+    free(foundprogpath);
     return 0;
 }
 
 char* findProgram(char* programname)
 {
-    
-     printf("prog name %s\n", programname);
     
     struct dirent *directoryinfo;
     struct stat storestat;
@@ -310,9 +254,7 @@ char* findProgram(char* programname)
                     //printf("Found executable %s\n", fullname);
                     if(strcmp(directoryinfo->d_name,programname) == 0 )
                     {
-                           //printf("found matching exe\n");
-                            //return fullname;
-                            
+
                             char *allocatedfullname = malloc(sizeof(char)*(strlen(fullname)+1));
                             strcpy(allocatedfullname, fullname);
                             allocatedfullname[strlen(fullname)] = '\0';
