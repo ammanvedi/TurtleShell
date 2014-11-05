@@ -136,51 +136,62 @@ int readCommand()
     char *command = malloc(sizeof(char)*30);
     char *arguments = malloc(sizeof(char)*100);
     char *arg_token;
-    char *argsplitter = " \n"; 
+    const char argsplitter = ' '; 
     char *svp;
     char **arg_list = malloc(sizeof(char*)*2);
     char *tempstring;
-    int countargs = 1;
+    int countargs = 0;
     
    
     
     printf("%s >> ", current_directory);
-    scanf("%s %[^\t\n]", command, arguments);
-    //printf("%s %s\n", command, arguments);
+    gets(arguments);
+    printf("arguments :: %s \n", arguments);
     
     //split arguments
     
-    arg_list[0] = command;
-    
-    arg_token = strtok_r(arguments, argsplitter, &svp);
+    //svp = arguments;
+    arg_token = strtok_r(arguments, &argsplitter, &svp);
     
     while(arg_token != NULL)
     {
+        //
         //allocate a string pointer
         //tempstring = malloc(sizeof(char)*(strlen(arg_token)));
         //arg_token 
         printf("%s %d\n", arg_token, strlen(arg_token));
         
+        
+        arg_list = realloc(arg_list, sizeof(char *)*(++countargs));
+        arg_list[countargs-1] = (char *)malloc(strlen(arg_token)+1);
+        strcpy(arg_list[countargs-1], arg_token);
         //char *tmparg = 
         //char *argholder = malloc(sizeof(char*)*(strlen(arg_token)+1));
         //strcpy(argholder, arg_token);
         //argholder[strlen(arg_token)] = '\0';
+        arg_token = strtok_r(NULL, &argsplitter, &svp);
         
-        arg_list[countargs] = arg_token;
+        printf("processing arg %s \n", arg_list[countargs-1]);
+            //arg_token;
         //printf("argholder: %d\n", strlen(argholder));
-        countargs+=1;
+        //countargs+=1;
         //realloc
-        arg_list = realloc(arg_list, sizeof(char*)*(countargs));
+        
         //printf("%p\n", arg_token);
-        arg_token = strtok_r(NULL, argsplitter, &svp);
+        
     }
+    
+    arg_list = realloc(arg_list, sizeof(char *)*(countargs+1));
+    arg_list[countargs] = (char*)0;
     
     //arg_list = realloc(arg_list, sizeof(char*)*
     
     //realloc(arg_list, sizeof(char)*(countargs+1));
-    printf("lenth args = %lu\n", (sizeof(arg_list)/ sizeof(arg_list[0])) );
     
-    arg_list[countargs+1] = 0;
+    //arg_list[countargs] = (char *)malloc(100);
+    //printf("init iterating and found %s\n", arg_list[1]);
+    //printf("lenth args = %lu\n", (sizeof(&arg_list)/ sizeof(arg_list[0])) );
+    //strcpy(arg_list[countargs], (char *)'h');
     
     int x = 0;
     //printf("init iterating and found %s\n", arg_list[1]);
@@ -189,22 +200,29 @@ int readCommand()
     
     printf("\n");
     
-    runProgram(command, arg_list);
+
+    
+    runProgram(arg_list);
+    
+        free(command);
+    free(arguments);
     
     return 0;
     
 }
 
-int runProgram(char* name, char *arguments[])
+int runProgram(char *arguments[])
 {
     
+   
+    //strcpy(foundprogpath, tmppp);
+    printf("strlen of tmppp %s \n", arguments[0]);
     //char *tmppp = 
-    char *foundprogpath = findProgram(name);
+    char *foundprogpath = findProgram(arguments[0]);
     
     //printf("strlen of tmppp %s\n", tmppp);
     
-    //strcpy(foundprogpath, tmppp);
-    printf("strlen of tmppp %s \n", foundprogpath);
+    
 
     
     //allocate path so it doesnt dissapear
@@ -234,9 +252,11 @@ int runProgram(char* name, char *arguments[])
             //printf("dapath : %s\n", arguments[0]);
             
             
-            
+            printf("val is %s\n", arguments[0]);
+            printf("val is %s\n", arguments[1]);
+            printf("val is %s\n", arguments[2]);
             int execstat = execv(foundprogpath, arguments);
-            printf("calling EXECV :: %d\n", execstat);
+            printf("calling EXECV failed :: %d\n", execstat);
         }else
         {
             
@@ -254,12 +274,15 @@ int runProgram(char* name, char *arguments[])
         }
     }
     printf("finishedddddd\n");
-   // free(arguments);
+    free(arguments);
     return 0;
 }
 
 char* findProgram(char* programname)
 {
+    
+     printf("prog name %s\n", programname);
+    
     struct dirent *directoryinfo;
     struct stat storestat;
     DIR *direc;
