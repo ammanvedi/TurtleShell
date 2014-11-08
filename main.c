@@ -37,6 +37,12 @@ int readProfile()
     
     profilepointer = fopen(".profile", "rt");
     
+    if(profilepointer == NULL)
+    {
+        printf("\x1b[31mERROR :: \x1b[0m Profile not found \n");
+        return 1;
+    }
+    
     while(fgets(buf,1000, profilepointer) != NULL)
     {
         //determine if reading the path variable line
@@ -108,12 +114,32 @@ int readProfile()
         }
     }
     
+    //verify both path and home have been assigned
+    //path is assigned if pathcount > 0
+    //home is assigned if it has been assigned
+    
+    if( (pathcount < 1)  )
+    {
+        printf("\x1b[31mERROR :: \x1b[0m Could not read PATH \n");
+        return 1;
+    }
+    
+    if( strlen(env_home) < 1)
+    {
+        printf("\x1b[31mERROR :: \x1b[0m Could not read HOME \n");
+        return 1;
+    }
+    
+    
     return 0;
 }
 
 int init()
 {
-    readProfile();
+    if(readProfile() == 1)
+    {
+        return 0;
+    }
     changeDirectory(env_home);
     while(1)
     {
@@ -151,6 +177,12 @@ int readCommand()
     printf("%s >> ", current_directory);
     gets(arguments);
     //printf("arguments :: %s \n", arguments);
+    
+    if(strlen(arguments) < 2)
+    {
+
+        return 1;
+    }
     
     //split arguments
     
@@ -196,10 +228,19 @@ int runProgram(char *arguments[])
         //printf("FOUND REQUESTED EXE ::%s %d\n", foundprogpath, strlen(foundprogpath));
         //fork the current process
         
+        //if the user is attempting to change directory 
+        //change directory in local environment
+        if(strcmp("cd", arguments[0]) == 0)
+        {
+            printf("calling on cd result :: %d\n", changeDirectory(arguments[1]));
+
+        }
+
         int newproc = fork();
         
         if(newproc == 0)
         {
+
             int execstat = execv(foundprogpath, arguments);
             printf("calling EXECV failed :: %d\n", execstat);
         }else
@@ -271,19 +312,34 @@ char* findProgram(char* programname)
 
 int changeDirectory(char *togo)
 {
+    
+    char *formatteddir;
+    formatteddir = malloc(sizeof(char)*(strlen(togo)));
+    strcpy(formatteddir, togo);
+    formatteddir[strlen(formatteddir)-1] = '\0';
+    
+    int x = chdir(formatteddir);
+    
+    if(x == 0)
+    {
+    //if the change of directory was successful
     //free the old memory
     free(current_directory);
     //allocate a new block of the appropriate size
     //according to strlen of new string
-    current_directory = malloc(sizeof(char)*(strlen(togo)));
+    //current_directory = malloc(sizeof(char)*(strlen(togo)));
     //copy new path into the gloabal path variable
-    strcpy(current_directory, togo);
-
+    //strcpy(current_directory, togo);
+    current_directory = formatteddir;
     //strings assigned here may have anewline character at the end
     //this will cause problems for chdir, so we replace the '\0'
     //to replace the newline
     
-    current_directory[strlen(current_directory)-1] = '\0';
-    int x = chdir(current_directory);
+    //current_directory[strlen(current_directory)-1] = '\0';
+    printf("changedir %s\n", current_directory);
+    }
+         
+
+    
     return x;
 }
