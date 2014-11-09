@@ -45,7 +45,7 @@ char* parsePathString(char * buf)
                 
             //if we are reading the path line, then count the number of
             //directories, so we can create an appropriatley sized array
-            //printf("found the path line\n");
+           
             
             char *pathpointslash = (char *)'0';
             char *pathpointcolon = buf;
@@ -72,7 +72,9 @@ char* parsePathString(char * buf)
             int foldercount = 0;
             pathpointslash = (char*)'0';
             pathpointcolon = buf;
-        //printf("buf is %d\n", strlen(buf));
+    
+            //iterate and fill the array with the path variables
+            //paths are between / and : characters
             
             while((pathpointcolon != NULL) )
             {
@@ -92,33 +94,20 @@ char* parsePathString(char * buf)
                     //null terminate string, strcpy doesnt always do this
                     pathvarnull[strlen(pathvarnull)] = '\0';
                     pathfolder[foldercount] = pathvarnull;
-                    //printf(" FOLDERED PATHVAR ::  %s\n", pathvarnull);
-                        
+
                     }else
                     {
                     //printf("madeit\n");
                     char *pathvar = malloc(sizeof(char)*((strlen(pathpointslash)-strlen(pathpointcolon))+1));
-                    
                     strncpy(pathvar, pathpointslash, strlen(pathpointslash)-strlen(pathpointcolon));
-                    //null terminate string, strcpy doesnt always do this
                     pathvar[strlen(pathvar)] = '\0';
                     pathfolder[foldercount] = pathvar;
-                    //printf(" FOLDERED PATHVAR ::  %s\n", pathvar);
-                        
                     }
                     foldercount+=1;
                     
                     
-                }else
-                {
-
-                    
                 }
             }
-
-    
-            
-            
             return *pathfolder;
 }
 
@@ -136,7 +125,7 @@ int readProfile()
 {
     FILE *profilepointer;
     char buf[1000];
-    char * temphome;
+    char *temphome;
 
     
     profilepointer = fopen(".profile", "rt");
@@ -152,17 +141,16 @@ int readProfile()
         //determine if reading the path variable line
         if(strstr(buf, "PATH") != NULL)
         {
+            //parse the path string
             env_path = parsePathString(buf);
       
         }else
         {
             if(strstr(buf, "HOME") != NULL)
             {
-      
                 temphome = strchr(buf, '/');
                 env_home = malloc(sizeof(char)*strlen(temphome));
                 strcpy(env_home, temphome);
-                //printf(" FOLDERED HOME :: %s\n", env_home);
             }
         }
     }
@@ -246,9 +234,7 @@ int readCommand()
     //this will allow the reading of a null terminated string without the 
     //newline character (consumed regardless by %*c
     scanf("%[^\n]%*c",arguments);
-    
-    
-   // printf("arguments :: %s \n", arguments);
+
     
     if(strlen(arguments) < 2)
     {
@@ -257,23 +243,16 @@ int readCommand()
     }
     
     //split arguments
-    
-    //svp = arguments;
+
     arg_token = strtok_r(arguments, &argsplitter, &svp);
     
     while(arg_token != NULL)
     {
-        //
-        //allocate a string pointer
-        //tempstring = malloc(sizeof(char)*(strlen(arg_token)));
-        //printf("%s %d\n", arg_token, strlen(arg_token));
+        //reallocate the argument list
         arg_list = realloc(arg_list, sizeof(char *)*(++countargs));
         arg_list[countargs-1] = (char *)malloc(strlen(arg_token)+1);
         strcpy(arg_list[countargs-1], arg_token);
-        arg_token = strtok_r(NULL, &argsplitter, &svp);
-        
-        //printf("processing arg %s \n", arg_list[countargs-1]);
-        
+        arg_token = strtok_r(NULL, &argsplitter, &svp);        
     }
     
     arg_list = realloc(arg_list, sizeof(char *)*(countargs+1));
@@ -327,14 +306,10 @@ int runProgram(char *arguments[])
     if( (hometest = strnstr(arguments[0], "$HOME=", 6)) != NULL)
     {
         //user wishes to assign a new home
-        
-        
         free(env_home);
         char *newhome = malloc(sizeof(char)*strlen(hometest));
         strcpy(newhome, hometest+6);
         env_home = newhome;
-        //printf("want to edit home edited to :: %s \n", env_home);
-        
         return 0;
         
     }
@@ -356,32 +331,24 @@ int runProgram(char *arguments[])
         //path variable paths
         //printf("FOUND REQUESTED EXE ::%s %d\n", foundprogpath, strlen(foundprogpath));
         //fork the current process
-        
+        int newproc = fork();
 
+        if(newproc == 0)
+        {
+            int execstat = execv(foundprogpath, arguments);
+            printf("calling EXECV failed :: %d\n", execstat);
+            
+        }else
+        {
 
-            int newproc = fork();
+            pid_t tpid;
 
-            if(newproc == 0)
+            do 
             {
-
-                int execstat = execv(foundprogpath, arguments);
-                printf("calling EXECV failed :: %d\n", execstat);
-            }else
-            {
-
-                pid_t tpid;
-
-                do 
-                {
-                    tpid = wait(&c_stat);
-                    if(tpid != newproc)
-                    {
-                        //process_terminated(tpid);
-
-                    }
-                }while(tpid != newproc);
-            }
+                tpid = wait(&c_stat);
+            }while(tpid != newproc);
         }
+    }
     
 
     free(arguments);
@@ -425,10 +392,10 @@ char* findProgram(char* programname)
             sprintf( fullname , "%s/%s",pathfolder[y],directoryinfo->d_name);
             if(stat(fullname, &storestat) == 0)
             {
-                //return 1;
+                //check if file executable
                 if(access(fullname,X_OK) == 0)
                 {   
-                    //printf("Found executable %s\n", fullname);
+                    //check its name comparing to the desired program
                     if(strcmp(directoryinfo->d_name,programname) == 0 )
                     {
 
@@ -463,22 +430,22 @@ int changeDirectory(char *togo)
     formatteddir = malloc(sizeof(char)*(strlen(togo)));
     strcpy(formatteddir, togo);
     formatteddir[strlen(togo)-1] = '\0';
-    
     int x = chdir(formatteddir);
     
     if(x == 0)
     {
-    
-    char cwd[1024];
-        
-       if (getcwd(cwd, sizeof(cwd)) != NULL)
-       {
+        //chdir success
+        char cwd[512];
+        //refresh local copy of current directory with a 
+        //call to getcwd
+        if (getcwd(cwd, sizeof(cwd)) != NULL)
+        {
             char *fullpath = malloc(sizeof(char)*(strlen(cwd)));
             strcpy(fullpath, cwd);
             free(current_directory);
             current_directory = fullpath;
 
-       }
+        }
     }
     return x;
 }
