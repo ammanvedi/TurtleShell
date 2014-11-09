@@ -6,7 +6,9 @@
                 
             C O U R S E W O R K    O N E  
           
-                  NOVEMBER 2014
+                   NOVEMBER 2014
+                   
+            More Information in README.MD
 
 *********************************************************/
 
@@ -25,8 +27,6 @@
 int init();
 int changeDirectory(char *togo);
 int readProfile();
-int assignHome(char* home);
-int assignPath(char* path);
 int readCommand();
 int runProgram(char *arguments[]);
 char* findProgram(char* programname);

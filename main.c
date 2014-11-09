@@ -6,7 +6,9 @@
                 
             C O U R S E W O R K    O N E  
           
-                  NOVEMBER 2014
+                   NOVEMBER 2014
+                   
+            More Information in README.MD
 
 *********************************************************/
 
@@ -28,6 +30,108 @@ int main(void)
     return 0;
 }   
 
+/*
+
+Take the input string of space delimited arguments
+and generate an array of char * to each argument
+
+Args: buf - Pointer to the  buffer containing the path string 
+Returns char * Pointer to the char * array
+
+*/
+
+char* parsePathString(char * buf)
+{
+                
+            //if we are reading the path line, then count the number of
+            //directories, so we can create an appropriatley sized array
+            //printf("found the path line\n");
+            
+            char *pathpointslash = (char *)'0';
+            char *pathpointcolon = buf;
+            pathcount = 0;
+            
+            while((pathpointcolon != NULL) )
+            {
+                pathpointslash = strchr(pathpointcolon+1, '/');
+                pathpointcolon = strchr(pathpointslash+1, ':');
+
+                if((pathpointslash != NULL))
+                {
+                    
+                    pathcount+=1;
+                    //printf("COUNTED PATHVAR ::  %d\n", pathcount);
+                }else
+                {
+                    //printf("no next slash\n");
+                }
+            }
+            
+            pathfolder = (char **) malloc(sizeof(char *) * pathcount);
+            
+            int foldercount = 0;
+            pathpointslash = (char*)'0';
+            pathpointcolon = buf;
+        //printf("buf is %d\n", strlen(buf));
+            
+            while((pathpointcolon != NULL) )
+            {
+                pathpointslash = strchr(pathpointcolon+1, '/');
+                pathpointcolon = strchr(pathpointslash+1, ':');
+                
+                if((pathpointslash != NULL))
+                {
+                    
+                    
+                    if(pathpointcolon == NULL)
+                    {
+                    //the last path item, dont reference pathpointcolon
+                    //reference point for string changes to total string length
+                    char *pathvarnull = malloc(sizeof(char)*((strlen(buf)-strlen(pathpointslash))+1));
+                    strncpy(pathvarnull, pathpointslash, strlen(buf)-strlen(pathpointslash));
+                    //null terminate string, strcpy doesnt always do this
+                    pathvarnull[strlen(pathvarnull)] = '\0';
+                    pathfolder[foldercount] = pathvarnull;
+                    //printf(" FOLDERED PATHVAR ::  %s\n", pathvarnull);
+                        
+                    }else
+                    {
+                    //printf("madeit\n");
+                    char *pathvar = malloc(sizeof(char)*((strlen(pathpointslash)-strlen(pathpointcolon))+1));
+                    
+                    strncpy(pathvar, pathpointslash, strlen(pathpointslash)-strlen(pathpointcolon));
+                    //null terminate string, strcpy doesnt always do this
+                    pathvar[strlen(pathvar)] = '\0';
+                    pathfolder[foldercount] = pathvar;
+                    //printf(" FOLDERED PATHVAR ::  %s\n", pathvar);
+                        
+                    }
+                    foldercount+=1;
+                    
+                    
+                }else
+                {
+
+                    
+                }
+            }
+
+    
+            
+            
+            return *pathfolder;
+}
+
+
+/*
+
+Open the local .profile file, read the Home and Path variables
+and save these locally
+
+Returns 0 if successfull, 1 if an error was thrown
+
+*/
+
 int readProfile()
 {
     FILE *profilepointer;
@@ -48,59 +152,8 @@ int readProfile()
         //determine if reading the path variable line
         if(strstr(buf, "PATH") != NULL)
         {
-            //if we are reading the path line, then count the number of
-            //directories, so we can create an appropriatley sized array
-            //printf("found the path line\n");
-            
-            char *pathpointslash = '0';
-            char *pathpointcolon = buf;
-            pathcount = 0;
-            
-            while((pathpointslash != NULL) && (pathpointcolon != NULL) )
-            {
-                pathpointslash = strchr(pathpointcolon+1, '/');
-                pathpointcolon = strchr(pathpointslash+1, ':');
-                
-                if((pathpointslash == NULL) || (pathpointcolon == NULL))
-                {
-                    
-                }else
-                {
-                    pathcount+=1;
-                    //printf("COUNTED PATHVAR ::  %d\n", pathcount);
-                }
-            }
-            
-            pathfolder = (char **) malloc(sizeof(char *) * pathcount);
-            
-            int foldercount = 0;
-            pathpointslash = '0';
-            pathpointcolon = buf;
-            
-            while((pathpointslash != NULL) && (pathpointcolon != NULL) )
-            {
-                pathpointslash = strchr(pathpointcolon+1, '/');
-                pathpointcolon = strchr(pathpointslash+1, ':');
-                
-                if((pathpointslash == NULL) || (pathpointcolon == NULL))
-                {
-                    
-                }else
-                {
-                    char *pathvar = malloc(sizeof(char)*((strlen(pathpointslash)-strlen(pathpointcolon))+1));
-                    strncpy(pathvar, pathpointslash, strlen(pathpointslash)-strlen(pathpointcolon));
-                    //null terminate string, strcpy doesnt always do this
-                    pathvar[strlen(pathvar)] = '\0';
-                    pathfolder[foldercount] = pathvar;
-                    //printf(" FOLDERED PATHVAR ::  %s\n", pathvar);
-                    
-                    foldercount+=1;
-                    
-                }
-            }
-            
-            env_path = *pathfolder;
-            
+            env_path = parsePathString(buf);
+      
         }else
         {
             if(strstr(buf, "HOME") != NULL)
@@ -134,6 +187,15 @@ int readProfile()
     return 0;
 }
 
+/*
+
+System Iniitialisation,
+
+Read profile from local directory and switch to the home directory.
+Begin reading commands
+
+*/
+
 int init()
 {
     if(readProfile() == 1)
@@ -150,15 +212,20 @@ int init()
     return 0;
 }
 
-int assignHome(char* home)
-{
-    return 0;
-}
+/*
 
-int assignPath(char* path)
-{
-    return 0;
-}
+Print the current working directory and then wait for input
+from the user. parse the input arguments, and pass the array to 
+runprogram
+
+Args: Arguments[] - pointer to arguments array;
+                        
+                    {Progname , arg0, arg1 , arg2...}
+                    
+                    initial item must be executable 
+                    name of program
+    
+*/
 
 int readCommand()
 {
@@ -172,11 +239,16 @@ int readCommand()
     char *tempstring;
     int countargs = 0;
     
-   
+  
     
     printf("%s >> ", current_directory);
-    gets(arguments);
-    //printf("arguments :: %s \n", arguments);
+    //read any character except a newline, consume any character straight after 
+    //this will allow the reading of a null terminated string without the 
+    //newline character (consumed regardless by %*c
+    scanf("%[^\n]%*c",arguments);
+    
+    
+   // printf("arguments :: %s \n", arguments);
     
     if(strlen(arguments) < 2)
     {
@@ -215,11 +287,68 @@ int readCommand()
     
 }
 
+/*
+
+Take a set of arguments and a program name, locate the program
+in the system, fork a new process and run the requestd program
+
+The C library cd command uses chdir also, so this is intercepted 
+and chdir is called locally
+
+assignments to $PATH and $HOME in the local environment are 
+also checked for here.
+
+Args: Arguments[] - pointer to arguments array;
+                        
+                    {Progname , arg0, arg1 , arg2...}
+                    
+                    initial item must be executable 
+                    name of program
+    
+*/
+
 int runProgram(char *arguments[])
 {
 
     char *foundprogpath = findProgram(arguments[0]);
     int c_stat;
+    
+    //if the user is attempting to change directory 
+    //change directory in local environment
+    if(strcmp("cd", arguments[0]) == 0)
+    {
+        changeDirectory(arguments[1]);
+        return 0;
+    }
+    
+    char *hometest;
+    char *pathtest;
+    
+    if( (hometest = strnstr(arguments[0], "$HOME=", 6)) != NULL)
+    {
+        //user wishes to assign a new home
+        
+        
+        free(env_home);
+        char *newhome = malloc(sizeof(char)*strlen(hometest));
+        strcpy(newhome, hometest+6);
+        env_home = newhome;
+        //printf("want to edit home edited to :: %s \n", env_home);
+        
+        return 0;
+        
+    }
+    
+    if( ( pathtest = strnstr(arguments[0], "$PATH=", 6) ) != NULL)
+    {
+        //user wishes to assign a new path
+        //printf("want to edit path \n");
+        free(env_path);
+        env_path = parsePathString(pathtest+6);
+        
+        return 0;
+        
+    }
 
     if(foundprogpath != NULL)
     {
@@ -228,42 +357,49 @@ int runProgram(char *arguments[])
         //printf("FOUND REQUESTED EXE ::%s %d\n", foundprogpath, strlen(foundprogpath));
         //fork the current process
         
-        //if the user is attempting to change directory 
-        //change directory in local environment
-        if(strcmp("cd", arguments[0]) == 0)
-        {
-            printf("calling on cd result :: %d\n", changeDirectory(arguments[1]));
 
-        }
 
-        int newproc = fork();
-        
-        if(newproc == 0)
-        {
+            int newproc = fork();
 
-            int execstat = execv(foundprogpath, arguments);
-            printf("calling EXECV failed :: %d\n", execstat);
-        }else
-        {
-            
-            pid_t tpid;
-            
-            do 
+            if(newproc == 0)
             {
-                tpid = wait(&c_stat);
-                if(tpid != newproc)
+
+                int execstat = execv(foundprogpath, arguments);
+                printf("calling EXECV failed :: %d\n", execstat);
+            }else
+            {
+
+                pid_t tpid;
+
+                do 
                 {
-                    //process_terminated(tpid);
-                    
-                }
-            }while(tpid != newproc);
+                    tpid = wait(&c_stat);
+                    if(tpid != newproc)
+                    {
+                        //process_terminated(tpid);
+
+                    }
+                }while(tpid != newproc);
+            }
         }
-    }
+    
 
     free(arguments);
     free(foundprogpath);
     return 0;
 }
+
+/*
+
+Search all paths within PATH variable, check for executable file
+with name matching programname
+
+Args: programname - pointer to string containing name of program to be run
+Returns: Null if no executable found, Pointer to the path of the matched 
+         executable
+
+*/
+
 
 char* findProgram(char* programname)
 {
@@ -310,36 +446,39 @@ char* findProgram(char* programname)
     return NULL;
 }
 
+/*
+
+Change the working directory, and save a reference to it in 
+variable current_directory
+
+Args: togo - Pointer to the path string of directory to go to 
+Returns binary result of chdir
+
+*/
+
 int changeDirectory(char *togo)
 {
     
     char *formatteddir;
     formatteddir = malloc(sizeof(char)*(strlen(togo)));
     strcpy(formatteddir, togo);
-    formatteddir[strlen(formatteddir)-1] = '\0';
+    formatteddir[strlen(togo)-1] = '\0';
     
     int x = chdir(formatteddir);
     
     if(x == 0)
     {
-    //if the change of directory was successful
-    //free the old memory
-    free(current_directory);
-    //allocate a new block of the appropriate size
-    //according to strlen of new string
-    //current_directory = malloc(sizeof(char)*(strlen(togo)));
-    //copy new path into the gloabal path variable
-    //strcpy(current_directory, togo);
-    current_directory = formatteddir;
-    //strings assigned here may have anewline character at the end
-    //this will cause problems for chdir, so we replace the '\0'
-    //to replace the newline
     
-    //current_directory[strlen(current_directory)-1] = '\0';
-    printf("changedir %s\n", current_directory);
-    }
-         
+    char cwd[1024];
+        
+       if (getcwd(cwd, sizeof(cwd)) != NULL)
+       {
+            char *fullpath = malloc(sizeof(char)*(strlen(cwd)));
+            strcpy(fullpath, cwd);
+            free(current_directory);
+            current_directory = fullpath;
 
-    
+       }
+    }
     return x;
 }
